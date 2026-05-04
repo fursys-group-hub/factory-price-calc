@@ -131,6 +131,40 @@ tbody tr:hover td{background:#fafaf8}
   .brand-tabs-wrap{align-self:flex-start}
   td,th{padding:5px 6px;font-size:11px}
 }
+
+/* ── 확인 모달 ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.hidden{display:none}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.modal-hdr{padding:18px 22px 14px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-ttl{font-size:15px;font-weight:600}
+.modal-x{width:28px;height:28px;border:none;background:none;cursor:pointer;color:#aaa;font-size:18px;display:flex;align-items:center;justify-content:center;border-radius:6px;line-height:1}
+.modal-x:hover{background:#f5f5f5;color:#555}
+.modal-body{padding:18px 22px;overflow-y:auto;flex:1}
+.modal-sec{margin-bottom:16px}.modal-sec:last-child{margin-bottom:0}
+.modal-sec-ttl{font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.modal-sec-ttl::after{content:'';flex:1;height:1px;background:#f0f0f0}
+.brand-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:10px;font-size:13px;font-weight:600}
+.brand-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.rate-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.rate-tbl td{padding:6px 8px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+.rate-tbl td:first-child{color:#666}
+.rate-tbl td:last-child{font-weight:600;text-align:right;color:#1a1a1a}
+.rate-tbl tr:last-child td{border-bottom:none}
+.rate-sep td{padding:3px 8px;border-bottom:1px solid #e5e5e0;font-size:10px;color:#ccc;font-weight:400;text-transform:uppercase;letter-spacing:.05em}
+.item-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.item-tbl th{font-size:11px;font-weight:600;color:#888;padding:6px 8px;background:#fafaf8;border-bottom:1px solid #e5e5e0;text-align:left}
+.item-tbl td{padding:7px 8px;border-bottom:1px solid #f5f5f5;font-size:12px}
+.item-tbl tr:last-child td{border-bottom:none}
+.item-tbl .tc{text-align:center}
+.tag{display:inline-block;font-size:11px;padding:2px 9px;border-radius:10px;font-weight:600}
+.tag-s{background:#E1F5EE;color:#085041}
+.tag-o{background:#FAEEDA;color:#633806}
+.modal-ftr{padding:14px 22px 18px;border-top:1px solid #f0f0f0;display:flex;gap:10px;justify-content:flex-end;flex-shrink:0}
+.m-cancel{font-size:13px;padding:8px 18px;border-radius:8px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#666;font-weight:500}
+.m-cancel:hover{background:#f5f5f5}
+.m-confirm{font-size:13px;padding:8px 22px;border-radius:8px;cursor:pointer;border:1px solid #1D9E75;background:#1D9E75;color:#fff;font-weight:600}
+.m-confirm:hover{background:#0F6E56}
 </style>
 </head>
 <body>
@@ -175,6 +209,22 @@ tbody tr:hover td{background:#fafaf8}
   </div></div>
   <div class="err-msg" id="errMsg" style="display:none"></div>
   <div id="tableArea"></div>
+</div>
+
+
+<!-- 확인 모달 -->
+<div class="modal-overlay hidden" id="confirmModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-ttl">다운로드 전 확인</span>
+      <button class="modal-x" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-ftr">
+      <button class="m-cancel" id="modalCancel">취소</button>
+      <button class="m-confirm" id="modalConfirm">확인 후 다운로드</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -451,7 +501,7 @@ function renderTable(){
   a.querySelectorAll('.tog span').forEach(sp=>{
     sp.addEventListener('click',e=>{rows[+e.target.dataset.i].isOrder=e.target.dataset.v==='1';renderTable();});
   });
-  document.getElementById('dlBtn').addEventListener('click',dlHTML);
+  document.getElementById('dlBtn').addEventListener('click',showConfirmModal);
   document.getElementById('resetBtn').addEventListener('click',resetRows);
 }
 function refresh(){renderDocH();renderTable();}
@@ -613,6 +663,59 @@ ${sth}${oth}<th rowspan="2">구분</th>
   a.href=url;a.download=`공장판매가산출_${brand.name}_${d}.html`;a.click();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
 }
+
+
+/* ── 확인 모달 ── */
+function showConfirmModal(){
+  if(!rows.length) return;
+  const brand=actBrand(),p=pl(brand);
+
+  // 산출 기준 행 구성
+  const rateRows=[
+    ['제조경비 배부율', `× ${brand.mfg}`],
+    ['공장마진율', `${brand.margin}%`],
+  ];
+  brand.fees.forEach(f=>rateRows.push([f.name, `${f.rate}%`]));
+  if(rows.some(r=>r.isOrder)) rateRows.push(['주문품 추가요율', `${brand.order}%`]);
+
+  const rateHtml=rateRows.map(([label,val])=>`
+    <tr><td>${esc(label)}</td><td>${esc(val)}</td></tr>`).join('');
+
+  // 품목 목록
+  const itemHtml=rows.map(r=>`
+    <tr>
+      <td style="font-size:11px;color:#888">${esc(r.code)}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</td>
+      <td class="tc"><span class="tag ${r.isOrder?'tag-o':'tag-s'}">${r.isOrder?'주문품':'표준품'}</span></td>
+    </tr>`).join('');
+
+  document.getElementById('modalBody').innerHTML=`
+    <div class="modal-sec">
+      <div class="modal-sec-ttl">브랜드</div>
+      <span class="brand-badge" style="background:${p.bg};color:${p.tx}">
+        <span class="brand-dot" style="background:${p.tx}"></span>
+        ${esc(brand.name)}
+      </span>
+    </div>
+    <div class="modal-sec">
+      <div class="modal-sec-ttl">산출 기준 요율</div>
+      <table class="rate-tbl">${rateHtml}</table>
+    </div>
+    <div class="modal-sec">
+      <div class="modal-sec-ttl">품목별 구분 (${rows.length}개)</div>
+      <table class="item-tbl">
+        <thead><tr><th>단품코드</th><th>단품명</th><th class="tc">구분</th></tr></thead>
+        <tbody>${itemHtml}</tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('confirmModal').classList.add('hidden');}
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('modalCancel').addEventListener('click',closeModal);
+document.getElementById('modalConfirm').addEventListener('click',()=>{closeModal();dlHTML();});
+document.getElementById('confirmModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
 /* ── 초기 실행 ── */
 load();renderBTabs();renderDocH();
