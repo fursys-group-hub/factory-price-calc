@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>공장판매가 산출 표준서식</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard','Apple SD Gothic Neo','맑은 고딕',sans-serif;font-size:14px;background:#f7f7f5;color:#1a1a1a;min-height:100vh}
+
+/* ── 레이아웃 ── */
+.app-header{background:#fff;border-bottom:1px solid #e5e5e0;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.app-title{font-size:15px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:8px}
+.app-title svg{color:#1D9E75}
+.app-ver{font-size:11px;color:#999;font-weight:400}
+.container{max-width:1100px;margin:0 auto;padding:20px 24px 40px}
+
+/* ── 상단 설정 바 ── */
+.topbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.doc-field{display:flex;align-items:center;gap:6px;flex:1;min-width:200px}
+.doc-field label{font-size:12px;color:#888;white-space:nowrap;font-weight:500}
+.doc-field input{flex:1;font-size:13px;padding:7px 10px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;outline:none;transition:border-color .15s}
+.doc-field input:focus{border-color:#1D9E75}
+
+.brand-tabs{display:flex;border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fff}
+.brand-tab{font-size:12px;padding:7px 18px;background:#fff;color:#888;cursor:pointer;border:none;border-right:1px solid #eee;transition:all .12s;font-weight:500}
+.brand-tab:last-child{border-right:none}
+.brand-tab:hover{background:#fafafa;color:#555}
+.brand-tab.active-sidiz{background:#E1F5EE;color:#085041}
+.brand-tab.active-assoc{background:#E6F1FB;color:#042C53}
+.brand-tab.active-cha{background:#FAEEDA;color:#412402}
+
+.gear-btn{width:34px;height:34px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#999;transition:all .12s;flex-shrink:0}
+.gear-btn:hover,.gear-btn.open{background:#f0f0f0;color:#333}
+
+/* ── 설정 패널 ── */
+.settings-panel{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:20px;margin-bottom:16px;display:none}
+.settings-panel.open{display:block}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.ss{margin-bottom:16px}.ss:last-child{margin-bottom:0}
+.ss-title{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0}
+.sf{display:flex;flex-direction:column;gap:4px}
+.sf label{font-size:12px;color:#888;font-weight:500}
+.sf input{font-size:13px;padding:6px 10px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;outline:none}
+.sf input:focus{border-color:#1D9E75}
+
+/* ── 문서 헤더 미리보기 ── */
+.doc-header{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:18px 20px;margin-bottom:16px;font-size:13px;line-height:1.9}
+.dh-num{font-weight:600;color:#1a1a1a;font-size:13px}
+.dh-item{padding-left:.8rem;color:#666}
+.dh-sub{padding-left:1.4rem;font-size:12px;color:#777}
+.dh-bracket{padding-left:.9rem;font-size:12px;color:#aaa;font-style:italic}
+.dh-divider{border:none;border-top:1px solid #f0f0f0;margin:8px 0}
+
+/* ── 붙여넣기 영역 ── */
+.paste-zone{border:2px dashed #5DCAA5;border-radius:12px;overflow:hidden;background:#E1F5EE;transition:all .15s}
+.paste-zone.dragging{background:#c8eddc;border-color:#085041}
+.paste-zone.has-data{background:#fff;border-color:#ddd;border-style:solid}
+.paste-inner{display:flex;align-items:flex-start;gap:12px;padding:16px 18px}
+.paste-icon{flex-shrink:0;margin-top:3px;color:#1D9E75;opacity:.8}
+.paste-zone.has-data .paste-icon{color:#bbb}
+.paste-textarea{flex:1;min-height:68px;background:transparent;border:none;outline:none;color:#085041;font-size:13px;font-family:inherit;resize:none;line-height:1.7}
+.paste-textarea::placeholder{color:#5DCAA5;line-height:1.9;font-size:13px}
+.paste-zone.has-data .paste-textarea{min-height:24px;color:#888;font-size:12px}
+
+.err{font-size:12px;color:#e24b4a;margin-top:6px;padding-left:4px}
+
+/* ── 테이블 ── */
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid #e5e5e0;margin-top:16px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th{background:#fafaf8;font-size:11px;font-weight:600;color:#888;padding:8px 10px;border:1px solid #e5e5e0;text-align:center;white-space:nowrap}
+th.g0{background:#E1F5EE;color:#0F6E56}
+th.g1{background:#E6F1FB;color:#185FA5}
+th.g2{background:#FAEEDA;color:#854F0B}
+td{padding:7px 10px;border:1px solid #e5e5e0;color:#1a1a1a;font-size:12px;white-space:nowrap;text-align:center}
+tbody tr:hover td{background:#fafaf8}
+.hl-calc{background:#E1F5EE;color:#085041;font-weight:600}
+.hl-order{background:#FAEEDA;color:#412402;font-weight:600}
+.dash{color:#ccc}
+
+/* ── 구분 토글 ── */
+.tog{display:inline-flex;border:1px solid #ddd;border-radius:20px;overflow:hidden;font-size:11px}
+.tog span{padding:3px 10px;cursor:pointer;color:#999;user-select:none;transition:all .1s}
+.tog span:hover{color:#555}
+.tog span.on-std{background:#E1F5EE;color:#085041;font-weight:600}
+.tog span.on-ord{background:#FAEEDA;color:#633806;font-weight:600}
+
+/* ── 액션 버튼 ── */
+.actions{margin-top:16px;display:flex;gap:10px;align-items:center}
+.btn{font-size:13px;padding:8px 18px;border-radius:8px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#333;font-weight:500;transition:all .1s}
+.btn:hover{background:#f5f5f5}
+.btn-p{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.btn-p:hover{background:#0F6E56;border-color:#0F6E56}
+.btn-g{background:none;border-color:transparent;color:#999;font-size:12px}
+.btn-g:hover{color:#333}
+
+/* ── 반응형 ── */
+@media(max-width:700px){
+  .container{padding:12px 12px 32px}
+  .topbar{flex-direction:column;align-items:stretch}
+  .doc-field{min-width:auto}
+  .brand-tabs{align-self:flex-start}
+  .tbl-wrap{border-radius:8px}
+  td,th{padding:5px 6px;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-title">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+    공장판매가 산출 표준서식
+    <span class="app-ver">v1.0</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="doc-field"><label>문서번호</label><input id="docNum" value="R202604-00020"></div>
+    <div class="brand-tabs">
+      <button class="brand-tab active-sidiz" data-b="sidiz">시디즈</button>
+      <button class="brand-tab" data-b="assoc">관계사</button>
+      <button class="brand-tab" data-b="cha">CHA4300</button>
+    </div>
+    <button class="gear-btn" id="gearBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="ss"><div class="ss-title">기본 설정</div><div class="sgrid">
+      <div class="sf"><label>제조경비 배부율</label><input type="number" id="s_mfg" value="1.485" step="0.001" min="0"></div>
+      <div class="sf"><label>공장마진율 (%)</label><input type="number" id="s_margin" value="5.3" step="0.1" min="0"></div>
+      <div class="sf"><label>주문품 추가요율 (%)</label><input type="number" id="s_order" value="5.0" step="0.1" min="0"></div>
+    </div></div>
+    <div class="ss"><div class="ss-title">관계사 · CHA4300 공통</div><div class="sgrid">
+      <div class="sf"><label>기획/개발 수수료 (%)</label><input type="number" id="s_plandev" value="2.2" step="0.1" min="0"></div>
+      <div class="sf"><label>재고보관료 (%)</label><input type="number" id="s_inven" value="1.0" step="0.1" min="0"></div>
+    </div></div>
+    <div class="ss"><div class="ss-title">CHA4300 전용</div><div class="sgrid">
+      <div class="sf"><label>교차판매 수수료 (%)</label><input type="number" id="s_cross" value="1.0" step="0.1" min="0"></div>
+    </div></div>
+  </div>
+
+  <div class="doc-header" id="docHeader"></div>
+
+  <div class="paste-zone" id="pasteZone"><div class="paste-inner">
+    <svg class="paste-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+      <rect x="8" y="2" width="8" height="4" rx="1"/>
+      <line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
+    </svg>
+    <textarea id="pasteArea" class="paste-textarea" placeholder="ERP 문서 또는 엑셀에서 표를 복사 후 Ctrl+V&#10;&#10;ERP 제품 제조원가 결과내역 → 표 범위 드래그 → 복사 → 여기 붙여넣기&#10;엑셀 복사도 동일하게 지원됩니다"></textarea>
+  </div></div>
+
+  <div class="err" id="errMsg" style="display:none"></div>
+  <div id="tableArea"></div>
+</div>
+
+<script>
+const ceil100=n=>Math.ceil(n/100)*100,rnd=n=>Math.round(n),fmt=n=>n.toLocaleString('ko-KR');
+const pn=s=>{const n=parseFloat((s||'').replace(/,/g,'').replace(/\s/g,''));return isNaN(n)?0:n;};
+let rows=[],brand='sidiz';
+
+const gs=()=>({
+  mfg:parseFloat(document.getElementById('s_mfg').value)||1.485,
+  margin:parseFloat(document.getElementById('s_margin').value)||5.3,
+  order:parseFloat(document.getElementById('s_order').value)||5.0,
+  plandev:parseFloat(document.getElementById('s_plandev').value)||2.2,
+  inven:parseFloat(document.getElementById('s_inven').value)||1.0,
+  cross:parseFloat(document.getElementById('s_cross').value)||1.0
+});
+
+function brandLabel(){return brand==='sidiz'?'시디즈(SIDIZ)':brand==='assoc'?'관계사':'CHA4300';}
+
+function buildItemDefs(s){
+  const isEx=brand==='assoc'||brand==='cha',isCh=brand==='cha';
+  let items=[
+    `재료비 : 각 품목별 자재단가의 합`,
+    `노무비 : 작업시간(S/T) × 작업인원 × 임율 (6.62원/s)`,
+    `제조경비 : 노무비 × ${s.mfg}`,
+    `공장마진 : (재료비 + 노무비 + 제조경비) × ${s.margin}%`
+  ];
+  if(isEx){items.push(`기획/개발 수수료 : (재료비 + 노무비 + 제조경비) × ${s.plandev}%`);items.push(`재고보관료 : (재료비 + 노무비 + 제조경비) × ${s.inven}%`);}
+  if(isCh)items.push(`교차판매 수수료 : (재료비 + 노무비 + 제조경비) × ${s.cross}%`);
+  let m='제조경비 + 공장마진';if(isEx)m+=' + 기획/개발 수수료 + 재고보관료';if(isCh)m+=' + 교차판매 수수료';
+  items.push(`일반관리비 합계 : ${m}`);items.push(`개발비 : 제품별 직접 입력`);return items;
+}
+
+function renderDocHeader(){
+  const s=gs(),d=document.getElementById('docNum').value,items=buildItemDefs(s);
+  document.getElementById('docHeader').innerHTML=
+    `<div class="dh-num">1. 개요</div><div class="dh-item">- ${brandLabel()} 공장판매가 산출 표준 서식</div><div class="dh-item">- 기준 문서번호: ${d}</div><hr class="dh-divider">
+    <div class="dh-num">2. 공장판매가 산출 기준</div><div class="dh-item">- 공장판매가 = 재료비 + 노무비 + 일반관리비 합계 + 개발비</div><div class="dh-bracket">[항목 정의]</div>
+    ${items.map((t,i)=>`<div class="dh-sub">${i+1}) ${t}</div>`).join('')}
+    <div class="dh-item" style="margin-top:4px">- 금액 처리 기준 : 공장판매가 100원 단위 올림</div><hr class="dh-divider">
+    <div class="dh-num">3. 공장판매가 표준서식 <span style="font-weight:400;font-size:12px;color:#aaa">[단위: 원, 공급가액 기준]</span></div>`;
+}
+
+function calcRow(r,s){
+  const mc=rnd(r.labor*s.mfg),b3=r.material+r.labor+mc,fm=rnd(b3*s.margin/100);
+  let pd=0,iv=0,cs=0;
+  if(brand==='assoc'||brand==='cha'){pd=rnd(b3*s.plandev/100);iv=rnd(b3*s.inven/100);}
+  if(brand==='cha')cs=rnd(b3*s.cross/100);
+  const mt=mc+fm+pd+iv+cs,cp=ceil100(r.material+r.labor+mt),op=r.isOrder?ceil100(cp*(1+s.order/100)):null;
+  return{mc,fm,pd,iv,cs,mt,cp,op};
+}
+
+function renderTable(){
+  const s=gs(),a=document.getElementById('tableArea');
+  if(!rows.length){a.innerHTML='';return;}
+  const isA=brand==='assoc',isCh=brand==='cha',isEx=isA||isCh;
+  const gc=brand==='sidiz'?'g0':brand==='assoc'?'g1':'g2';
+  const gsp=3+(isA?2:0)+(isCh?3:0),ho=rows.some(r=>r.isOrder),hs=rows.some(r=>!r.isOrder);
+  const eh=isEx?`<th class="${gc}">기획/개발<br>수수료</th><th class="${gc}">재고<br>보관료</th>`:'';
+  const ch=isCh?`<th class="${gc}">교차판매<br>수수료</th>`:'';
+  const sth=hs?`<th rowspan="2">공장판매가<br>(표준품)</th>`:'';
+  const oth=ho?`<th rowspan="2">공장판매가<br>(주문품=표준품×${s.order}%)</th>`:'';
+  const tb=rows.map((r,i)=>{
+    const c=calcRow(r,s);let ex='';
+    if(isEx)ex+=`<td>${fmt(c.pd)}</td><td>${fmt(c.iv)}</td>`;
+    if(isCh)ex+=`<td>${fmt(c.cs)}</td>`;
+    const st=hs?(r.isOrder?`<td class="dash">-</td>`:`<td class="hl-calc">${fmt(c.cp)}</td>`):'';
+    const ot=ho?(r.isOrder?`<td class="hl-order">${c.op?fmt(c.op):'-'}</td>`:`<td class="dash">-</td>`):'';
+    return `<tr>
+      <td style="font-size:11px">${r.code}</td><td>${r.color}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${r.name}</td>
+      <td>${fmt(r.material)}</td><td>${fmt(r.labor)}</td>
+      <td>${fmt(c.mc)}</td><td>${fmt(c.fm)}</td>${ex}<td>${fmt(c.mt)}</td>
+      ${st}${ot}
+      <td><div class="tog">
+        <span class="${!r.isOrder?'on-std':''}" data-i="${i}" data-v="0">표준품</span>
+        <span class="${r.isOrder?'on-ord':''}" data-i="${i}" data-v="1">주문품</span>
+      </div></td>
+    </tr>`;
+  }).join('');
+  a.innerHTML=`<div class="tbl-wrap"><table><thead>
+    <tr><th rowspan="2">단품코드</th><th rowspan="2">색상</th><th rowspan="2">단품명칭</th><th rowspan="2">재료비</th><th rowspan="2">노무비</th><th colspan="${gsp}" class="${gc}">일반관리비</th>${sth}${oth}<th rowspan="2">구분</th></tr>
+    <tr><th class="${gc}">제조경비</th><th class="${gc}">공장마진</th>${eh}${ch}<th class="${gc}">합계</th></tr>
+  </thead><tbody>${tb}</tbody></table></div>
+  <div class="actions">
+    <button class="btn btn-p" id="dlBtn">HTML 문서 다운로드</button>
+    <button class="btn btn-g" id="resetBtn">초기화</button>
+  </div>`;
+  document.querySelectorAll('.tog span').forEach(sp=>{sp.addEventListener('click',e=>{rows[+e.target.dataset.i].isOrder=e.target.dataset.v==='1';renderTable();});});
+  document.getElementById('dlBtn').addEventListener('click',downloadHTML);
+  document.getElementById('resetBtn').addEventListener('click',reset);
+}
+
+function refresh(){renderDocHeader();renderTable();}
+
+/* ===== 파싱: 탭 구분 텍스트 ===== */
+function parseText(text){
+  const lines=text.trim().split(/\r?\n/).map(l=>l.split('\t').map(c=>c.trim()));
+  let hi=-1,cm={};
+  for(let i=0;i<Math.min(lines.length,6);i++){
+    const j=lines[i].join('');
+    if(j.includes('단품코드')||j.includes('자재비합계')||j.includes('자재비')){
+      hi=i;lines[i].forEach((c,k)=>{
+        if(c.includes('단품코드'))cm.code=k;
+        else if(c==='색상'||c.startsWith('색상'))cm.color=k;
+        else if(c.includes('단품명'))cm.name=k;
+        else if(c.includes('자재비'))cm.mat=k;
+        else if(c.includes('가공비'))cm.lab=k;
+      });break;
+    }
+  }
+  const si=hi>=0?hi+1:0,result=[];
+  for(let i=si;i<lines.length;i++){
+    const row=lines[i];if(row.length<3)continue;
+    const g=k=>{const x=cm[k];return(x!==undefined&&x<row.length)?row[x]||'':'';};
+    let mat,lab,code,color,name;
+    if(Object.keys(cm).length>=3){mat=pn(g('mat'));lab=pn(g('lab'));code=g('code');color=g('color');name=g('name');}
+    else{code=row[1]||'';color=row[2]||'';name=row[3]||'';mat=pn(row[4]);lab=pn(row[5]);}
+    if(!mat&&!lab)continue;if(!code&&!name)continue;
+    result.push({code,color,name,material:mat,labor:lab,isOrder:false});
+  }
+  return result;
+}
+
+/* ===== 파싱: HTML 테이블 ===== */
+function parseHTML(html){
+  const div=document.createElement('div');div.innerHTML=html;
+  const tables=div.querySelectorAll('table');
+  if(!tables.length)return null;
+  let bestTable=tables[0],maxRows=0;
+  tables.forEach(t=>{const rc=t.querySelectorAll('tr').length;if(rc>maxRows){maxRows=rc;bestTable=t;}});
+  const trs=bestTable.querySelectorAll('tr');
+  if(trs.length<2)return null;
+  const grid=[];
+  trs.forEach(tr=>{
+    const cells=[];
+    tr.querySelectorAll('th,td').forEach(td=>{
+      const text=td.textContent.replace(/\s+/g,' ').trim();
+      const colspan=parseInt(td.getAttribute('colspan'))||1;
+      for(let c=0;c<colspan;c++)cells.push(c===0?text:'');
+    });
+    if(cells.length>0)grid.push(cells);
+  });
+  let hi=-1,cm={};
+  for(let i=0;i<Math.min(grid.length,6);i++){
+    const j=grid[i].join('');
+    if(j.includes('단품코드')||j.includes('자재비')){
+      hi=i;grid[i].forEach((c,k)=>{
+        if(c.includes('단품코드'))cm.code=k;
+        else if(c.includes('색상'))cm.color=k;
+        else if(c.includes('단품명'))cm.name=k;
+        else if(c.includes('자재비'))cm.mat=k;
+        else if(c.includes('가공비'))cm.lab=k;
+      });break;
+    }
+  }
+  const si=hi>=0?hi+1:0,result=[];
+  for(let i=si;i<grid.length;i++){
+    const row=grid[i];if(row.length<3)continue;
+    const g=k=>{const x=cm[k];return(x!==undefined&&x<row.length)?row[x]||'':'';};
+    let mat,lab,code,color,name;
+    if(Object.keys(cm).length>=3){mat=pn(g('mat'));lab=pn(g('lab'));code=g('code');color=g('color');name=g('name');}
+    else{code=row[1]||'';color=row[2]||'';name=row[3]||'';mat=pn(row[4]);lab=pn(row[5]);}
+    if(!mat&&!lab)continue;if(!code&&!name)continue;
+    result.push({code:code.trim(),color:color.trim(),name:name.trim(),material:mat,labor:lab,isOrder:false});
+  }
+  return result.length>0?result:null;
+}
+
+/* ===== 공통 처리 ===== */
+function showResult(r,source){
+  rows=r;document.getElementById('pasteZone').classList.add('has-data');
+  const ta=document.getElementById('pasteArea');
+  ta.value=`✓ ${r.length}개 품목 인식됨 (${source==='html'?'ERP 문서':'엑셀'}에서 붙여넣기) — 다시 붙여넣으면 교체됩니다`;
+  ta.style.minHeight='24px';
+  document.getElementById('errMsg').style.display='none';
+  renderTable();
+}
+function showError(){
+  const e=document.getElementById('errMsg');e.style.display='';
+  e.textContent='표를 인식할 수 없습니다. 단품코드·자재비합계·가공비합계 열이 포함된 범위를 복사해 주세요.';
+}
+function reset(){
+  rows=[];document.getElementById('pasteZone').classList.remove('has-data');
+  const ta=document.getElementById('pasteArea');ta.value='';ta.style.minHeight='';
+  document.getElementById('tableArea').innerHTML='';document.getElementById('errMsg').style.display='none';
+}
+
+/* ===== 붙여넣기 이벤트 ===== */
+document.addEventListener('paste',function(e){
+  if(document.activeElement!==document.getElementById('pasteArea'))return;
+  e.preventDefault();
+  const html=e.clipboardData.getData('text/html');
+  if(html){const p=parseHTML(html);if(p&&p.length>0){showResult(p,'html');return;}}
+  const text=e.clipboardData.getData('text/plain');
+  if(text){const p=parseText(text);if(p&&p.length>0){showResult(p,'text');return;}}
+  showError();
+});
+
+/* ===== 드래그앤드롭 ===== */
+const pz=document.getElementById('pasteZone');
+pz.addEventListener('dragover',e=>{e.preventDefault();pz.classList.add('dragging');});
+pz.addEventListener('dragleave',()=>pz.classList.remove('dragging'));
+pz.addEventListener('drop',e=>{
+  e.preventDefault();pz.classList.remove('dragging');
+  const html=e.dataTransfer.getData('text/html');
+  if(html){const p=parseHTML(html);if(p&&p.length>0){showResult(p,'html');return;}}
+  const text=e.dataTransfer.getData('text/plain');
+  if(text){const p=parseText(text);if(p&&p.length>0){showResult(p,'text');return;}}
+  showError();
+});
+
+/* ===== UI 이벤트 ===== */
+document.getElementById('gearBtn').addEventListener('click',()=>{
+  document.getElementById('settingsPanel').classList.toggle('open');
+  document.getElementById('gearBtn').classList.toggle('open');
+});
+document.querySelectorAll('[data-b]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    brand=btn.dataset.b;
+    document.querySelectorAll('.brand-tab').forEach(b=>b.className='brand-tab');
+    btn.className='brand-tab active-'+brand;
+    refresh();
+  });
+});
+document.getElementById('docNum').addEventListener('input',renderDocHeader);
+document.querySelectorAll('#settingsPanel input').forEach(inp=>inp.addEventListener('change',refresh));
+
+/* ===== HTML 문서 생성 & 다운로드 ===== */
+function generateHTML(){
+  const s=gs(),d=document.getElementById('docNum').value;
+  const now=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'});
+  const bn=brandLabel(),isA=brand==='assoc',isCh=brand==='cha',isEx=isA||isCh;
+  const gsp=3+(isA?2:0)+(isCh?3:0);
+  const gc=brand==='sidiz'?'background:#e8f5ef;color:#084d35':brand==='assoc'?'background:#e8f2fb;color:#042C53':'background:#fef2d8;color:#412402';
+  const eh=isEx?'<th>기획/개발수수료</th><th>재고보관료</th>':'',ch=isCh?'<th>교차판매수수료</th>':'';
+  const ho=rows.some(r=>r.isOrder),hs=rows.some(r=>!r.isOrder);
+  const items=buildItemDefs(s);
+  const sth=hs?'<th rowspan="2">공장판매가(표준품)</th>':'';
+  const oth=ho?`<th rowspan="2">공장판매가(주문품=표준품×${s.order}%)</th>`:'';
+  const trs=rows.map(r=>{
+    const c=calcRow(r,s);let ex='';
+    if(isEx)ex+=`<td>${fmt(c.pd)}</td><td>${fmt(c.iv)}</td>`;if(isCh)ex+=`<td>${fmt(c.cs)}</td>`;
+    const st=hs?(r.isOrder?`<td style="color:#aaa">-</td>`:`<td class="hl">${fmt(c.cp)}</td>`):'';
+    const ot=ho?(r.isOrder?`<td class="hl2">${c.op?fmt(c.op):'-'}</td>`:`<td style="color:#aaa">-</td>`):'';
+    return `<tr><td>${r.code}</td><td>${r.color}</td><td>${r.name}</td><td>${fmt(r.material)}</td><td>${fmt(r.labor)}</td><td>${fmt(c.mc)}</td><td>${fmt(c.fm)}</td>${ex}<td>${fmt(c.mt)}</td>${st}${ot}<td>${r.isOrder?'주문품':'표준품'}</td></tr>`;
+  }).join('');
+  return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<title>공장판매가 산출 — ${bn}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'맑은 고딕','Apple SD Gothic Neo',sans-serif;font-size:10pt;color:#111}b{font-size:10pt}p{font-size:9.5pt;line-height:1.75}.bracket{font-size:9pt;color:#666;font-style:italic;margin-top:2px}table{border-collapse:collapse;width:100%;margin-top:6px}th,td{border:.5pt solid #999;padding:4px 5pt;text-align:center;font-size:8.5pt;white-space:nowrap}th{font-weight:bold;background:#f4f4f4}.grp{${gc}}.hl{background:#e8f5ef;font-weight:bold}.hl2{background:#fef2d8;font-weight:bold}@media print{body{margin:0}}</style></head><body>
+<b>1. 개요</b><br>- <strong>${bn}</strong> 공장판매가 산출 표준 서식<br>- 기준 문서번호: ${d} &nbsp; 작성일: ${now}<br><br>
+<b>2. 공장판매가 산출 기준</b><br>- 공장판매가 = 재료비 + 노무비 + 일반관리비 합계 + 개발비<br><span class="bracket">[항목 정의]</span><br>${items.map((t,i)=>`${i+1}) ${t}<br>`).join('')}- 금액 처리 기준 : 공장판매가 100원 단위 올림<br><br>
+<b>3. 공장판매가 표준서식</b> <span style="font-size:8.5pt;color:#555">[단위: 원, 공급가액 기준]</span>
+<table><thead><tr><th rowspan="2">단품코드</th><th rowspan="2">색상</th><th rowspan="2">단품명칭</th><th rowspan="2">재료비</th><th rowspan="2">노무비</th><th colspan="${gsp}" class="grp">일반관리비</th>${sth}${oth}<th rowspan="2">구분</th></tr><tr><th class="grp">제조경비</th><th class="grp">공장마진</th>${eh}${ch}<th class="grp">합계</th></tr></thead><tbody>${trs}</tbody></table></body></html>`;
+}
+
+function downloadHTML(){
+  const bn=brandLabel().replace(/[()]/g,''),d=document.getElementById('docNum').value;
+  const blob=new Blob([generateHTML()],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=`공장판매가산출_${bn}_${d}.html`;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+
+/* 초기 렌더 */
+renderDocHeader();
+</script>
+</body>
+</html>
