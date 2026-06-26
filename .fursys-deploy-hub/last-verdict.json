@@ -1,0 +1,12 @@
+{
+  "commit": "4fc93d19094a0b6e38df0af6992f432cc1a2ebef",
+  "tree": "c1958d21c7ae676f90aa3a8ae04d458add6f2685",
+  "branch": "main",
+  "security": "pass",
+  "deployable": true,
+  "final": "ok",
+  "report": ".fursys-deploy-hub/security-report-20260626-1004.md",
+  "generated_at": "2026-06-26 09:41",
+  "env_plan": [],
+  "volumes_plan": []
+}
